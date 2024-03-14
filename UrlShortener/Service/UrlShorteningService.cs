@@ -50,9 +50,9 @@ namespace UrlShortener.Service
 
             return shortenedUrl.Url;
         }
-        public async Task<IEnumerable> GetAllUrls()
+        public async Task<IEnumerable<ShortenedUrls>> GetAllUrls()
         {
-            return _context.ShortenedUrls.Select(r => r.Url);
+            return await _context.ShortenedUrls.Select(r => new ShortenedUrls(r)).ToArray();
         }
         public async Task<bool> Delete(Guid guid)
         {
