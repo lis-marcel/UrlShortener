@@ -33,9 +33,8 @@ namespace UrlShortener.Service
 
             _context.Add(shortenedUrls);
             await _context.SaveChangesAsync();
-            _context.Dispose();
 
-            return shortenedUrls.Id;
+            return (Guid)shortenedUrls.Id;
         }
         public async Task<string> FindUrl(string code)
         {
