@@ -1,6 +1,6 @@
 ﻿namespace UrlShortener.Entities
 {
-    public class ShortenedUrls
+    public class ShortenedUrl
     {
         public Guid Id { get; set; }
         public string Url { get; set; } = string.Empty;

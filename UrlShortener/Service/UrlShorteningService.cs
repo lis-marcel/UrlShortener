@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections;
 using UrlShortener.Database;
 using UrlShortener.Entities;
+using UrlShortener.Service.DTOconverters;
 
 namespace UrlShortener.Service
 {
@@ -22,7 +22,7 @@ namespace UrlShortener.Service
         {
             var code = await GenerateUniqueCode();
 
-            ShortenedUrls shortenedUrls = new()
+            ShortenedUrl shortenedUrls = new()
             {
                 Id = new Guid(),
                 Url = url,
@@ -50,9 +50,11 @@ namespace UrlShortener.Service
 
             return shortenedUrl.Url;
         }
-        public async Task<IEnumerable<ShortenedUrls>> GetAllUrls()
+        public async Task<IEnumerable<ShortenedUrlData>> GetAllUrls()
         {
-            return await _context.ShortenedUrls.Select(r => new ShortenedUrls(r)).ToArray();
+            return _context.ShortenedUrls.Select
+                (r => ConvertShortenedUrl.ShortendedUrlToShortendedUrlData(r))
+                .ToList();
         }
         public async Task<bool> Delete(Guid guid)
         {
@@ -65,30 +67,28 @@ namespace UrlShortener.Service
         }
         private async Task<string> GenerateUniqueCode()
         {
-            var codeChars = new char[CodeLength];
-            int maxValue = Alphabet.Length;
-
-            for (var i = 0; i < CodeLength; i++)
+            string stringCode;
+            do
             {
-                int randomIndex = _random.Next(maxValue);
+                var codeChars = new char[CodeLength];
+                int maxValue = Alphabet.Length;
 
-                codeChars[i] = Alphabet[randomIndex];
+                for (var i = 0; i < CodeLength; i++)
+                {
+                    int randomIndex = _random.Next(maxValue);
+                    codeChars[i] = Alphabet[randomIndex];
+                }
+
+                stringCode = new string(codeChars);
             }
+            while (await CodeExists(stringCode));
 
-            string stringCode = new(codeChars);
-
-            if (await CodeExists(stringCode))
-            {
-                await GenerateUniqueCode();
-            }
-
-            return new string(codeChars);
+            return stringCode;
         }
         private async Task<bool> CodeExists(string code)
         {
             bool doesExist = await _context.ShortenedUrls.AnyAsync(r => r.Code == code);
-
-            return true ? doesExist : false;
+            return doesExist;
         }
     }
 }

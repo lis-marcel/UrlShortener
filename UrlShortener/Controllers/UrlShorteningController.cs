@@ -34,7 +34,6 @@ namespace UrlShortener.Controllers
 
             return Results.Ok(res);
         }
-
         [HttpGet]
         [Route("/{code}")]
         public async Task<IResult> RedirectRequest(string code)

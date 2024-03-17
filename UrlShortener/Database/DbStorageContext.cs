@@ -6,7 +6,7 @@ namespace UrlShortener.Database
 {
     public class DbStorageContext : DbContext
     {
-        public DbSet<ShortenedUrlData> ShortenedUrls { get; set; }
+        public DbSet<ShortenedUrl> ShortenedUrls { get; set; }
 
         public DbStorageContext(DbContextOptions<DbStorageContext> options) : base(options)
         {
