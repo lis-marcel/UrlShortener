@@ -33,11 +33,10 @@ namespace UrlShortener.Service
 
             _context.Add(shortenedUrls);
             await _context.SaveChangesAsync();
-            _context.Dispose();
 
             return shortenedUrls.Id;
         }
-        public async Task<string> FindUrl(string code)
+        public async Task<string> FindUrlByCode(string code)
         {
             var shortenedUrl = await _context
                 .ShortenedUrls
@@ -50,11 +49,26 @@ namespace UrlShortener.Service
 
             return shortenedUrl.Url;
         }
+        public async Task<ShortenedUrlData> GetUrlById(Guid guid)
+        {
+            var url = await _context.ShortenedUrls.SingleAsync(r => r.Id == guid);
+
+            var urlData = new ShortenedUrlData()
+            {
+                Id = url.Id,
+                Url = url.Url,
+                Code = url.Code,
+                ShortUrl = url.ShortUrl,
+                CreationTime = url.CreationTime,
+            };
+
+            return urlData;
+        }
         public async Task<IEnumerable<ShortenedUrlData>> GetAllUrls()
         {
-            return _context.ShortenedUrls.Select
+            return await _context.ShortenedUrls.Select
                 (r => ConvertShortenedUrl.ShortendedUrlToShortendedUrlData(r))
-                .ToList();
+                .ToListAsync();
         }
         public async Task<bool> Delete(Guid guid)
         {
@@ -65,7 +79,7 @@ namespace UrlShortener.Service
 
             return true ? result > 0 : false;
         }
-        private async Task<string> GenerateUniqueCode()
+        public async Task<string> GenerateUniqueCode()
         {
             string stringCode;
             do
@@ -81,14 +95,14 @@ namespace UrlShortener.Service
 
                 stringCode = new string(codeChars);
             }
-            while (await CodeExists(stringCode));
+            while (await CodeExist(stringCode));
 
             return stringCode;
         }
-        private async Task<bool> CodeExists(string code)
+        public async Task<bool> CodeExist(string code)
         {
-            bool doesExist = await _context.ShortenedUrls.AnyAsync(r => r.Code == code);
-            return doesExist;
+            bool exist = await _context.ShortenedUrls.AnyAsync(r => r.Code == code);
+            return exist;
         }
     }
 }
