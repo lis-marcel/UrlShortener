@@ -30,9 +30,12 @@ namespace UrlShortener.Controllers
             var myObject = JsonSerializer.Deserialize<UrlShorteningRequest>(body);
 
             var serviceDomain = $"{Request.Scheme}://{Request.Host}";
-            var res = await urlShorteningService.Add(serviceDomain, myObject.Url);
+            var addedGuid = await urlShorteningService.Add(serviceDomain, myObject.Url);
 
-            return Results.Ok(res);
+            var dbRecord = await urlShorteningService.GetUrlById(addedGuid);
+            var shrotenedLink = dbRecord.ShortUrl;
+
+            return Results.Ok(shrotenedLink);
         }
         [HttpGet]
         [Route("/{code}")]

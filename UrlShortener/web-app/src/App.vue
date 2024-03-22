@@ -1,15 +1,14 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <ShortenUrl />
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import ShortenUrl from './components/ShortenUrl.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    ShortenUrl
   }
 }
 </script>

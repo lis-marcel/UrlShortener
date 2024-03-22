@@ -22,7 +22,7 @@ namespace UrlShortener
                 options.AddPolicy("DevCORS",
                 builder =>
                 {
-                    builder.WithOrigins("http://localhost:5123")
+                    builder.WithOrigins("http://localhost:8080")
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                 });
