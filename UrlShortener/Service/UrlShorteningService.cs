@@ -2,6 +2,7 @@
 using UrlShortener.Database;
 using UrlShortener.Entities;
 using UrlShortener.Service.DTOconverters;
+using System.Linq;
 
 namespace UrlShortener.Service
 {
@@ -24,7 +25,7 @@ namespace UrlShortener.Service
 
             ShortenedUrl shortenedUrls = new()
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Url = url,
                 Code = code,
                 ShortUrl = $"{domain}/{code}",
@@ -77,11 +78,14 @@ namespace UrlShortener.Service
             _context.ShortenedUrls.Remove(shortenedUrl);
             var result = await _context.SaveChangesAsync();
 
-            return true ? result > 0 : false;
+            return result > 0;
         }
         public async Task<string> GenerateUniqueCode()
         {
             string stringCode;
+            var existingCodesList = await _context.ShortenedUrls.Select(r => r.Code).ToListAsync();
+            var existingCodes = new HashSet<string>(existingCodesList);
+
             do
             {
                 var codeChars = new char[CodeLength];
@@ -95,7 +99,7 @@ namespace UrlShortener.Service
 
                 stringCode = new string(codeChars);
             }
-            while (await CodeExist(stringCode));
+            while (existingCodes.Contains(stringCode));
 
             return stringCode;
         }

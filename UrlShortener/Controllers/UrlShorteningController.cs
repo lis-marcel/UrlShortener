@@ -13,30 +13,32 @@ namespace UrlShortener.Controllers
     public class UrlShorteningController : Controller
     {
         private readonly DbStorageContext _context;
+        private readonly UrlShorteningService _urlShorteningService;
 
-        public UrlShorteningController(DbStorageContext context)
+        public UrlShorteningController(DbStorageContext context, UrlShorteningService urlShorteningService)
         {
             _context = context;
+            _urlShorteningService = urlShorteningService;
         }
 
         [HttpPost]
         [Route("/add")]
-        public async Task<IResult> Add()
+        public async Task<IActionResult> Add([FromBody] UrlShorteningRequest request)
         {
-            var urlShorteningService = new UrlShorteningService(_context);
-
-            using var reader = new StreamReader(Request.Body);
-            var body = await reader.ReadToEndAsync();
-            var myObject = JsonSerializer.Deserialize<UrlShorteningRequest>(body);
+            if (string.IsNullOrEmpty(request.Url))
+            {
+                return BadRequest("URL cannot be null or empty.");
+            }
 
             var serviceDomain = $"{Request.Scheme}://{Request.Host}";
-            var addedGuid = await urlShorteningService.Add(serviceDomain, myObject.Url);
+            var addedGuid = await _urlShorteningService.Add(serviceDomain, request.Url);
 
-            var dbRecord = await urlShorteningService.GetUrlById(addedGuid);
-            var shrotenedLink = dbRecord.ShortUrl;
+            var dbRecord = await _urlShorteningService.GetUrlById(addedGuid);
+            var shortenedLink = dbRecord.ShortUrl;
 
-            return Results.Ok(shrotenedLink);
+            return Ok(shortenedLink);
         }
+
         [HttpGet]
         [Route("/{code}")]
         public async Task<IResult> RedirectRequest(string code)
