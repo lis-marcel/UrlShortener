@@ -37,18 +37,13 @@ namespace UrlShortener.Service
 
             return shortenedUrls.Id;
         }
-        public async Task<string> FindUrlByCode(string code)
+        public async Task<string?> FindUrlByCode(string code)
         {
             var shortenedUrl = await _context
                 .ShortenedUrls
                 .FirstOrDefaultAsync(r => r.Code == code);
 
-            if (shortenedUrl is null)
-            {
-                return null;
-            }
-
-            return shortenedUrl.Url;
+            return shortenedUrl?.Url;
         }
         public async Task<ShortenedUrlData> GetUrlById(Guid guid)
         {
