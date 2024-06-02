@@ -8,11 +8,7 @@ namespace UrlShortener.Service
 {
     public class UrlShorteningService
     {
-        private readonly Random _random = new();
         private readonly DbStorageContext _context;
-        private const int CodeLength = 7;
-        private const string Alphabet =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
         public UrlShorteningService(DbStorageContext context)
         {
@@ -77,31 +73,10 @@ namespace UrlShortener.Service
         }
         public async Task<string> GenerateUniqueCode()
         {
-            string stringCode;
-            var existingCodesList = await _context.ShortenedUrls.Select(r => r.Code).ToListAsync();
-            var existingCodes = new HashSet<string>(existingCodesList);
+            var codeGenerator = new CodeGenerator(_context);
+            var uniqueCode = codeGenerator.GenerateUniqueCode();
 
-            do
-            {
-                var codeChars = new char[CodeLength];
-                int maxValue = Alphabet.Length;
-
-                for (var i = 0; i < CodeLength; i++)
-                {
-                    int randomIndex = _random.Next(maxValue);
-                    codeChars[i] = Alphabet[randomIndex];
-                }
-
-                stringCode = new string(codeChars);
-            }
-            while (existingCodes.Contains(stringCode));
-
-            return stringCode;
-        }
-        public async Task<bool> CodeExist(string code)
-        {
-            bool exist = await _context.ShortenedUrls.AnyAsync(r => r.Code == code);
-            return exist;
+            return uniqueCode.ToString();
         }
     }
 }
