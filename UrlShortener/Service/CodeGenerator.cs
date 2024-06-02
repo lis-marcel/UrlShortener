@@ -18,7 +18,7 @@ namespace UrlShortener.Service
 
         public async Task<string> GenerateUniqueCode()
         {
-            string code;
+            string? code;
             int batchSize = 10;
 
             do
@@ -46,12 +46,14 @@ namespace UrlShortener.Service
                     int randomIndex = _random.Next(maxValue);
                     codeChars[j] = Alphabet[randomIndex];
                 }
+
+                codesBatch.Add(new string(codeChars));
             }
 
             return codesBatch;
         }
 
-        private async Task<string> FindUniqeCodeInBatch(List<string> codesBatch)
+        private async Task<string?> FindUniqeCodeInBatch(List<string> codesBatch)
         {
             foreach (var code in codesBatch)
             {

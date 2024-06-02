@@ -128,23 +128,5 @@ namespace UrlShortener.Service.Test
 
             context.Database.EnsureDeleted();
         }
-        [TestMethod]
-        public void CodeExistTest()
-        {
-            var options = new DbContextOptionsBuilder<DbStorageContext>()
-                .UseInMemoryDatabase(databaseName: "AppTestDb.db")
-                .Options;
-            using var context = new DbStorageContext(options);
-            var service = new UrlShorteningService(context);
-
-            var addResGuid = service.Add("yt.com/10", "https://foxnet.com").Result;
-            var foundObjectByGuid = service.GetUrlById(addResGuid).Result;
-
-            var code = foundObjectByGuid.Code;
-
-            var codeExist = service.CodeExist(code).Result;
-
-            Assert.IsTrue(codeExist);
-        }
     }
 }

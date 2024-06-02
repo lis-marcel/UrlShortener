@@ -2,7 +2,6 @@
 using UrlShortener.Database;
 using UrlShortener.Entities;
 using UrlShortener.Service.DTOconverters;
-using System.Linq;
 
 namespace UrlShortener.Service
 {
@@ -74,7 +73,7 @@ namespace UrlShortener.Service
         public async Task<string> GenerateUniqueCode()
         {
             var codeGenerator = new CodeGenerator(_context);
-            var uniqueCode = codeGenerator.GenerateUniqueCode();
+            var uniqueCode = await codeGenerator.GenerateUniqueCode();
 
             return uniqueCode.ToString();
         }
