@@ -7,6 +7,7 @@ namespace UrlShortener.Service
     {
         private readonly Random _random = new();
         private readonly DbStorageContext _dbContext;
+        private readonly int BatchSize = 10;
         private const int CodeLength = 7;
         private const string Alphabet =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -19,11 +20,10 @@ namespace UrlShortener.Service
         public async Task<string> GenerateUniqueCode()
         {
             string? code;
-            int batchSize = 10;
 
             do
             {
-                var codesBatch = GenerateCodesBatch(batchSize);
+                var codesBatch = GenerateCodesBatch(BatchSize);
 
                 code = await FindUniqeCodeInBatch(codesBatch);
             } 
