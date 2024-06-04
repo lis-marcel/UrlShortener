@@ -17,12 +17,14 @@ namespace UrlShortener
             builder.Services.AddDbContext<DbStorageContext>(options =>
                 options.UseSqlite(builder.Configuration.GetConnectionString("AppDbConnection")));
 
+            builder.Services.AddScoped<UrlShorteningService>();
+
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("DevCORS",
+                options.AddDefaultPolicy(
                 builder =>
                 {
-                    builder.WithOrigins("http://localhost:8080")
+                    builder.WithOrigins("http://localhost:5173")
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                 });

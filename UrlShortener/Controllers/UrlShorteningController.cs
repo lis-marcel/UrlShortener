@@ -9,7 +9,6 @@ using UrlShortener.Service;
 
 namespace UrlShortener.Controllers
 {
-    [EnableCors("DevCORS")]
     public class UrlShorteningController : Controller
     {
         private readonly DbStorageContext _context;
