@@ -8,10 +8,10 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Home</a>
+                <router-link to="/"><a class="nav-link">Home</a></router-link>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Account</a>
+                <router-link to="/account"><a class="nav-link">Account</a></router-link>
             </li>
             </ul>
         </div>

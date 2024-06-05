@@ -55,14 +55,14 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
   .container {
     margin: 5vh;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 30vh;
-    width: 30vh;
+    width: 50%;
     border: 1px solid black;
     border-radius: 20px;
   }

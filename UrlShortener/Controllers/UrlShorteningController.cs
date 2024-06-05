@@ -42,8 +42,7 @@ namespace UrlShortener.Controllers
         [Route("/{code}")]
         public async Task<IResult> RedirectRequest(string code)
         {
-            var urlShorteningService = new UrlShorteningService(_context);
-            var url = await urlShorteningService.FindUrlByCode(code);
+            var url = await _urlShorteningService.FindUrlByCode(code);
 
             return url is null 
                 ? Results.NotFound() 

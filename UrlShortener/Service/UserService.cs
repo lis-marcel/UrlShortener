@@ -18,7 +18,7 @@ namespace UrlShortener.Service
             {
                 Id = Guid.NewGuid(),
                 Name = userData.Name,
-                Password = userData.Password,
+                Password = PasswordHashing.HashPassword(userData.Password),
                 Email = userData.Email,
             };
 
