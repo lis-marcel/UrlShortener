@@ -43,8 +43,8 @@ export default {
         .then(response => {
           this.shortLink = response.data;
         })
-        
-      } catch (error) {
+      } 
+      catch (error) {
         console.error(error);
       }
     },

@@ -4,11 +4,11 @@
       <form @submit.prevent="loginUser">
         <div class="mb-3">
           <label for="email" class="form-label">Email</label>
-          <input type="email" class="form-control" id="email" v-model="userCredentials.email" required>
+          <input type="email" class="form-control" id="email" v-model="loginRequest.Email" required>
         </div>
         <div class="mb-3">
           <label for="password" class="form-label">Hasło</label>
-          <input type="password" class="form-control" id="password" v-model="userCredentials.password" required>
+          <input type="password" class="form-control" id="password" v-model="loginRequest.Password" required>
         </div>
         <button type="submit" class="btn btn-primary">Zaloguj się</button>
         <p class="mt-3">Nie masz konta? <router-link to="/register">Zarejestruj się</router-link></p>
@@ -16,24 +16,34 @@
     </div>
   </template>
   
-  <script>
-  export default {
-    data() {
-      return {
-        userCredentials: {
-          email: '',
-          password: ''
-        }
-      };
-    },
-    methods: {
-      async loginUser() {
-        // Tutaj dodaj logikę do logowania użytkownika, np. wysyłając dane do API
-        console.log('Logowanie użytkownika:', this.userCredentials);
+<script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      loginRequest: {
+        Email: '',
+        Password: ''
+      }
+    };
+  },
+  methods: {
+    async loginUser() {
+      try {
+        const response = await axios.post('https://localhost:7271/login', this.loginRequest, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        console.log(response.data);
+      } catch (error) {
+        console.error(error);
       }
     }
-  };
-  </script>
+  }
+}
+</script>
 
 <style scoped>
 .container {

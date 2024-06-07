@@ -18,6 +18,7 @@ namespace UrlShortener
                 options.UseSqlite(builder.Configuration.GetConnectionString("AppDbConnection")));
 
             builder.Services.AddScoped<UrlShorteningService>();
+            builder.Services.AddScoped<UserService>();
 
             builder.Services.AddCors(options =>
             {
