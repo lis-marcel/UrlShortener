@@ -27,7 +27,7 @@ namespace UrlShortener.Service
                 CreationTime = DateTime.Now,
             };
 
-            _context.Add(shortenedUrls);
+            _context.ShortenedUrls.Add(shortenedUrls);
             await _context.SaveChangesAsync();
 
             return shortenedUrls.Id;
@@ -72,7 +72,7 @@ namespace UrlShortener.Service
         }
         public async Task<string> GenerateUniqueCode()
         {
-            var codeGenerator = new CodeGenerator(_context);
+            var codeGenerator = new CodeGeneratorService(_context);
             var uniqueCode = await codeGenerator.GenerateUniqueCode();
 
             return uniqueCode.ToString();

@@ -21,7 +21,7 @@ namespace UrlShortener.Service.Test
                 .UseInMemoryDatabase(databaseName: "AppTestDb.db")
                 .Options;
             using var context = new DbStorageContext(options);
-            var generator = new CodeGenerator(context);
+            var generator = new CodeGeneratorService(context);
             var service = new UrlShorteningService(context);
 
             // Act

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using UrlShortener.Database;
 using UrlShortener.Entities;
@@ -17,6 +18,11 @@ namespace UrlShortener.Service
 
         public async Task<bool> RegisterUser(RegisterRequestData registerRequestData)
         {
+            if (await UserExists(registerRequestData.Email))
+            {
+                return false;
+            }
+
             var user = new User()
             {
                 Id = Guid.NewGuid(),
@@ -25,20 +31,10 @@ namespace UrlShortener.Service
                 Email = registerRequestData.Email,
             };
 
-            _context.Add(user);
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
             return true;
-        }
-
-        public async Task<Guid?> Login(LoginRequestData loginRequestData)
-        {
-            if (await UserExists(loginRequestData.Email) && await ValidateUser(loginRequestData))
-            {
-                return await CreateSession(loginRequestData.Email);
-            }
-
-            return null;
         }
 
         public async Task<bool> UserExists(string email)
@@ -46,7 +42,29 @@ namespace UrlShortener.Service
             return await _context.Users.AnyAsync(r => r.Email == email);
         }
 
-        public async Task<bool> ValidateUser(LoginRequestData loginRequestData) 
+        public async Task<Guid?> Login(LoginRequestData loginRequestData)
+        {
+            var user = await _context.Users.SingleOrDefaultAsync(r => r.Email == loginRequestData.Email);
+
+            if (user is not null && PasswordHashing.VerifyPassword(user.Password, loginRequestData.Password))
+            {
+                var sessionService = new SessionService(_context);
+                var sessionKey = await sessionService.CreateSession(user.Email);
+
+                return sessionKey;
+            }
+
+            return null;
+        }
+
+        public async Task<bool> Logout(string email)
+        {
+            var sessionService = new SessionService(_context);
+
+            return await sessionService.DeleteSession(email);
+        }
+
+        public async Task<bool> ValidateUser(LoginRequestData loginRequestData)
         {
             var user = await _context.Users.SingleOrDefaultAsync(r => r.Email == loginRequestData.Email);
 
@@ -56,35 +74,6 @@ namespace UrlShortener.Service
             }
 
             return true;
-        }
-
-        public async Task<Guid> CreateSession(string email)
-        {
-            var session = new Session(email);
-
-            if (await SessionExists(email))
-            {
-                var existingSession = _context.Sessions.Single(r => r.Email == email);
-                existingSession.SessionKey = Guid.NewGuid();
-                existingSession.CreationTime = DateTime.Now;
-
-                _context.Sessions.Update(existingSession);
-            }
-            else
-            {
-                _context.Sessions.Add(session);
-            }
-
-            await _context.SaveChangesAsync();
-
-            return session.SessionKey;
-        }
-
-        private async Task<bool> SessionExists(string email)
-        {
-            var session = await _context.Sessions.SingleOrDefaultAsync(r => r.Email == email);
-
-            return (session is not null) ? true : false;
         }
     }
 }

@@ -82,5 +82,26 @@ namespace UrlShortener.Controllers
                 return BadRequest("Invalid email or password.");
             }
         }
+
+        [HttpPost]
+        [Route("/logout")]
+        public async Task<IActionResult> Logout([FromBody] string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Can not identify user");
+            }
+
+            var result = await _userService.Logout(email);
+
+            if (result)
+            {
+                return Ok("User logged out successfully.");
+            }
+            else
+            {
+                return BadRequest("User logout failed.");
+            }
+        }
     }
 }

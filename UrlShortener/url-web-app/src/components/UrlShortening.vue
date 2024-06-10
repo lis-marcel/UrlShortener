@@ -63,8 +63,9 @@ export default {
     align-items: center;
     height: 30vh;
     width: 50%;
-    border: 1px solid black;
-    border-radius: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }
 
   .form-group {

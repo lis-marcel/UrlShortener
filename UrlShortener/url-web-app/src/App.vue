@@ -7,3 +7,9 @@ import { RouterLink, RouterView } from 'vue-router'
   <Navbar />
   <RouterView />
 </template>
+
+<style>
+  template {
+    background-color:  #f0f0f0;
+  };
+</style>

@@ -40,9 +40,43 @@ namespace UrlShortener.Service.Test
             var result = await userService.Login(loginData);
 
             // Assert
-            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType<Guid>(result);
 
             context.Database.EnsureDeleted();
+        }
+
+        [TestMethod]
+        public async Task DeleteSessionTest()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<DbStorageContext>()
+                .UseInMemoryDatabase(databaseName: "CreateSessionTest")
+                .Options;
+            using var context = new DbStorageContext(options);
+            var userService = new UserService(context);
+            var email = "test@mail.com";
+            var password = "test";
+            var user = new RegisterRequestData()
+            {
+                Name = "Test",
+                Password = password,
+                Email = email,
+            };
+            var loginData = new LoginRequestData()
+            {
+                Email = email,
+                Password = password
+            };
+
+            await userService.RegisterUser(user);
+            var result = await userService.Login(loginData);
+
+            // Act
+            var sessionService = new SessionService(context);
+            var deleteResult = await sessionService.DeleteSession(email);
+
+            // Assert
+            Assert.IsTrue(deleteResult);
         }
     }
 }

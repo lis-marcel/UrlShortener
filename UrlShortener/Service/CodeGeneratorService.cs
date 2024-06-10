@@ -3,18 +3,18 @@ using UrlShortener.Database;
 
 namespace UrlShortener.Service
 {
-    public class CodeGenerator
+    public class CodeGeneratorService
     {
         private readonly Random _random = new();
-        private readonly DbStorageContext _dbContext;
+        private readonly DbStorageContext _context;
         private readonly int BatchSize = 10;
         private const int CodeLength = 7;
         private const string Alphabet =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        public CodeGenerator(DbStorageContext dbContext)
+        public CodeGeneratorService(DbStorageContext context)
         {
-            _dbContext = dbContext;
+            _context = context;
         }
 
         public async Task<string> GenerateUniqueCode()
@@ -57,7 +57,7 @@ namespace UrlShortener.Service
         {
             foreach (var code in codesBatch)
             {
-                bool exists = await _dbContext.ShortenedUrls.AnyAsync(r => r.Code == code);
+                bool exists = await _context.ShortenedUrls.AnyAsync(r => r.Code == code);
 
                 if (!exists)
                 {

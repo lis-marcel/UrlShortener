@@ -47,11 +47,10 @@ export default {
   
 <style scoped>
 .container {
-    width: 50%;
-    margin: 0 auto; /* Add this line to center the container */
-    padding: 2rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 50%;
+  padding: 2rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 </style>

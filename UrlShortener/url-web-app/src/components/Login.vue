@@ -1,23 +1,23 @@
 <template>
     <div class="container mt-5">
-      <h2>Logowanie</h2>
+      <h2>Log in</h2>
       <form @submit.prevent="loginUser">
         <div class="mb-3">
           <label for="email" class="form-label">Email</label>
           <input type="email" class="form-control" id="email" v-model="loginRequest.Email" required>
         </div>
         <div class="mb-3">
-          <label for="password" class="form-label">Hasło</label>
+          <label for="password" class="form-label">Password</label>
           <input type="password" class="form-control" id="password" v-model="loginRequest.Password" required>
         </div>
-        <button type="submit" class="btn btn-primary">Zaloguj się</button>
-        <p class="mt-3">Nie masz konta? <router-link to="/register">Zarejestruj się</router-link></p>
+        <button type="submit" class="btn btn-primary">Log in</button>
+        <p class="mt-3">Don't have account? <router-link to="/register">Register here</router-link></p>
       </form>
     </div>
   </template>
   
 <script>
-import axios from 'axios';
+import { API_URL } from '../config/consts';
 
 export default {
   data() {
@@ -31,12 +31,26 @@ export default {
   methods: {
     async loginUser() {
       try {
-        const response = await axios.post('https://localhost:7271/login', this.loginRequest, {
+        const response = await fetch(`${API_URL}/login`, {
+          method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           },
+          body: JSON.stringify(this.loginRequest)
         });
-        console.log(response.data);
+
+        const token = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem('userToken', token);
+
+          var temp = localStorage.getItem('userToken');
+          console.log(temp);
+
+          this.$router.push('/');
+        } else {
+          alert(data.message);
+        }
       } catch (error) {
         console.error(error);
       }
@@ -47,8 +61,8 @@ export default {
 
 <style scoped>
 .container {
-  width: 50%;
-  margin: 0 auto; /* Add this line to center the container */
+  width: 30%;
+  margin: 0 auto;
   padding: 2rem;
   border: 1px solid #ccc;
   border-radius: 5px;
