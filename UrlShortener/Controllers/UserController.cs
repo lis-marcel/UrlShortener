@@ -103,5 +103,7 @@ namespace UrlShortener.Controllers
                 return BadRequest("User logout failed.");
             }
         }
+
+        [HttpPost]
     }
 }

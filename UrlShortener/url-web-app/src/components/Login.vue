@@ -42,11 +42,7 @@ export default {
         const token = await response.json();
 
         if (response.ok) {
-          localStorage.setItem('userToken', token);
-
-          var temp = localStorage.getItem('userToken');
-          console.log(temp);
-
+          localStorage.setItem('authToken', token);
           this.$router.push('/');
         } else {
           alert(data.message);
