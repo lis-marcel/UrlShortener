@@ -6,13 +6,14 @@
         public string Email { get; set; }
         public Guid SessionKey { get; set; }
         public DateTime CreationTime { get; set; }
+        public DateTime ExpirationTime { get; set; }
 
         public Session(string email)
         {
-            Id = Guid.NewGuid();
             Email = email;
             SessionKey = Guid.NewGuid();
             CreationTime = DateTime.Now;
+            ExpirationTime = DateTime.Now.AddMinutes(20);
         }
     }
 }

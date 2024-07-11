@@ -1,8 +1,8 @@
 <template>
     <div class="container mt-5">
         <h2>Account info</h2>
-        <p>Email: {{ user.Name }}</p>
-        <p>Name: {{ user.Email }}</p>
+        <p>Name: {{ user.name }}</p>
+        <p>Email: {{ user.email }}</p>
     </div>
 </template>
 
@@ -13,14 +13,15 @@ export default {
     data() {
         return {
             user: {
-                Email: '',
-                Name: '',
+                email: '',
+                name: '',
             }
         };
     },
     async mounted() {
         try {
             const response = await fetch(`${API_URL}/user`, {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                 }
@@ -28,6 +29,8 @@ export default {
 
             if (response.ok) {
                 this.user = await response.json();
+
+                console.log(this.user);
             } else {
                 this.$router.push('/login');
             }

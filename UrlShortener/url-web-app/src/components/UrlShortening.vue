@@ -9,14 +9,14 @@
         </div>
       </form>
     </div>
-  </div>
-
-  <div v-if="shortLink" class="output">
-    <div class="output-content">
-      <h2>Your shortened link is:</h2>
-      <p>{{ shortLink }}</p>
+    <br>
+    <div v-if="shortLink" class="output">
+      <div class="output-content">
+        <h2>Your shortened link is:</h2>
+        <p>{{ shortLink }}</p>
+      </div>
+      <button @click="copyToClipboard" class="btn btn-primary">Copy to clipboard</button>
     </div>
-    <button @click="copyToClipboard" class="btn btn-primary">Copy to clipboard</button>
   </div>
 </template>
 
@@ -61,7 +61,8 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 30vh;
+    flex-direction: column;
+    height: 35vh;
     width: 50%;
     border: 1px solid #ccc;
     border-radius: 5px;

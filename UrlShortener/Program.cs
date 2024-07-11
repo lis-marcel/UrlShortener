@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Session;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Text;
@@ -19,6 +20,7 @@ namespace UrlShortener
 
             builder.Services.AddScoped<UrlShorteningService>();
             builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<SessionService>();
 
             builder.Services.AddCors(options =>
             {
@@ -29,6 +31,14 @@ namespace UrlShortener
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                 });
+            });
+
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.Cookie.Name = ".UrlShortener.Session";
+                options.IdleTimeout = TimeSpan.FromMinutes(20);
+                options.Cookie.IsEssential = true;
             });
 
             builder.Services.AddControllers();
@@ -45,6 +55,8 @@ namespace UrlShortener
                 app.UseSwaggerUI();
             }
 
+            app.UseSession();
+
             app.UseCors(builder => builder
                 .AllowAnyOrigin()
                 .AllowAnyMethod()
@@ -56,6 +68,8 @@ namespace UrlShortener
                 var fileBytes = await File.ReadAllBytesAsync(filePath);
                 return Results.Content(Encoding.UTF8.GetString(fileBytes), "text/html");
             });
+
+            app.UseMiddleware<SessionMiddleware>();
 
             app.UseHttpsRedirection();
 

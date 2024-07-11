@@ -14,14 +14,15 @@ namespace UrlShortener.Service.Test
     public class SessionTest
     {
         [TestMethod]
-        public async Task CreateSessionTest()
+        public async Task LoginTest()
         {
             // Arrange
             var options = new DbContextOptionsBuilder<DbStorageContext>()
-                .UseInMemoryDatabase(databaseName: "CreateSessionTest")
+                .UseInMemoryDatabase(databaseName: "LoginTest")
                 .Options;
             using var context = new DbStorageContext(options);
             var userService = new UserService(context);
+            var sessionService = new SessionService(context);
             var email = "test@mail.com";
             var password = "test";
             var user = new RegisterRequestData()
@@ -37,7 +38,7 @@ namespace UrlShortener.Service.Test
             };
             // Act
             await userService.RegisterUser(user);
-            var result = await userService.Login(loginData);
+            var result = await sessionService.Login(loginData);
 
             // Assert
             Assert.IsInstanceOfType<Guid>(result);
@@ -46,14 +47,16 @@ namespace UrlShortener.Service.Test
         }
 
         [TestMethod]
-        public async Task DeleteSessionTest()
+        public async Task LogoutTest()
         {
             // Arrange
             var options = new DbContextOptionsBuilder<DbStorageContext>()
-                .UseInMemoryDatabase(databaseName: "CreateSessionTest")
+                .UseInMemoryDatabase(databaseName: "LoginTest")
                 .Options;
             using var context = new DbStorageContext(options);
             var userService = new UserService(context);
+            var sessionService = new SessionService(context);
+
             var email = "test@mail.com";
             var password = "test";
             var user = new RegisterRequestData()
@@ -69,14 +72,13 @@ namespace UrlShortener.Service.Test
             };
 
             await userService.RegisterUser(user);
-            var result = await userService.Login(loginData);
+            var result = await sessionService.Login(loginData);
 
             // Act
-            var sessionService = new SessionService(context);
-            var deleteResult = await sessionService.DeleteSession(email);
+            var logoutResult = await sessionService.Logout(result.ToString());
 
             // Assert
-            Assert.IsTrue(deleteResult);
+            Assert.IsTrue(logoutResult);
         }
     }
 }

@@ -65,41 +65,5 @@ namespace UrlShortener.Service.Test
             // Assert
             Assert.IsTrue(exists);
         }
-
-        [TestMethod]
-        public async Task LoginTest()
-        {
-            // Arrange
-            var options = new DbContextOptionsBuilder<DbStorageContext>()
-                .UseInMemoryDatabase(databaseName: "AppTestDb.db")
-                .Options;
-            using var context = new DbStorageContext(options);
-            var service = new UserService(context);
-            var email = "test@email.com";
-            var password = "password";
-
-            // Act
-            var user = new RegisterRequestData()
-            {
-                Name = "Test",
-                Email = email,
-                Password = password,
-            };
-
-            await service.RegisterUser(user);
-
-            var login = new LoginRequestData()
-            {
-                Email = email,
-                Password = password,
-            };
-
-            var validateResult = await service.ValidateUser(login);
-
-            // Assert
-            Assert.IsTrue(validateResult);
-
-            context.Database.EnsureDeleted();
-        }
     }
 }

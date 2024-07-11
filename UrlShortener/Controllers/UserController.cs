@@ -11,11 +11,13 @@ namespace UrlShortener.Controllers
     {
         private readonly DbStorageContext _context;
         private readonly UserService _userService;
+        private readonly SessionService _sessionService;
 
-        public UserController(DbStorageContext context, UserService userService)
+        public UserController(DbStorageContext context, UserService userService, SessionService sessionService)
         {
             _context = context;
             _userService = userService;
+            _sessionService = sessionService;
         }
 
         [HttpPost]
@@ -24,12 +26,12 @@ namespace UrlShortener.Controllers
         {
             if (string.IsNullOrEmpty(registerRequest.Name) || string.IsNullOrEmpty(registerRequest.Email) || string.IsNullOrEmpty(registerRequest.Password))
             {
-                return BadRequest("Name, password, and email cannot be null or empty.");
+                return BadRequest("Name, password, and token cannot be null or empty.");
             }
 
             if (await _userService.UserExists(registerRequest.Email))
             {
-                return BadRequest("User with this email already exists.");
+                return BadRequest("User with this token already exists.");
             }
 
             var registerRequestData = new RegisterRequestData()
@@ -62,7 +64,7 @@ namespace UrlShortener.Controllers
 
             if (!await _userService.UserExists(loginRequest.Email))
             {
-                return BadRequest("User with this email doesn't exist.");
+                return BadRequest("User with this token doesn't exist.");
             }
 
             var loginRequestData = new LoginRequestData()
@@ -71,7 +73,7 @@ namespace UrlShortener.Controllers
                 Password = loginRequest.Password
             };
 
-            var loginResult = await _userService.Login(loginRequestData);
+            var loginResult = await _sessionService.Login(loginRequestData);
 
             if (loginResult is not null)
             {
@@ -79,20 +81,22 @@ namespace UrlShortener.Controllers
             }
             else
             {
-                return BadRequest("Invalid email or password.");
+                return BadRequest("Invalid token or password.");
             }
         }
 
         [HttpPost]
         [Route("/logout")]
-        public async Task<IActionResult> Logout([FromBody] string email)
+        public async Task<IActionResult> Logout()
         {
-            if (string.IsNullOrEmpty(email))
+            var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+            if (string.IsNullOrEmpty(token))
             {
                 return BadRequest("Can not identify user");
             }
 
-            var result = await _userService.Logout(email);
+            var result = await _sessionService.Logout(token);
 
             if (result)
             {
@@ -105,5 +109,26 @@ namespace UrlShortener.Controllers
         }
 
         [HttpPost]
+        [Route("/user")]
+        public async Task<IActionResult> GetUser()
+        {
+            var token = Request.Headers.Authorization;
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return BadRequest("Can not identify user");
+            }
+
+            var user = await _userService.GetUserByToken(token);
+
+            if (user is not null)
+            {
+                return Ok(user);
+            }
+            else
+            {
+                return BadRequest("User not found.");
+            }
+        }
     }
 }

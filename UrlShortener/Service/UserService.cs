@@ -15,7 +15,6 @@ namespace UrlShortener.Service
         {
             _context = context;
         }
-
         public async Task<bool> RegisterUser(RegisterRequestData registerRequestData)
         {
             if (await UserExists(registerRequestData.Email))
@@ -36,34 +35,10 @@ namespace UrlShortener.Service
 
             return true;
         }
-
         public async Task<bool> UserExists(string email)
         {
             return await _context.Users.AnyAsync(r => r.Email == email);
         }
-
-        public async Task<Guid?> Login(LoginRequestData loginRequestData)
-        {
-            var user = await _context.Users.SingleOrDefaultAsync(r => r.Email == loginRequestData.Email);
-
-            if (user is not null && PasswordHashing.VerifyPassword(user.Password, loginRequestData.Password))
-            {
-                var sessionService = new SessionService(_context);
-                var sessionKey = await sessionService.CreateSession(user.Email);
-
-                return sessionKey;
-            }
-
-            return null;
-        }
-
-        public async Task<bool> Logout(string email)
-        {
-            var sessionService = new SessionService(_context);
-
-            return await sessionService.DeleteSession(email);
-        }
-
         public async Task<bool> ValidateUser(LoginRequestData loginRequestData)
         {
             var user = await _context.Users.SingleOrDefaultAsync(r => r.Email == loginRequestData.Email);
@@ -74,6 +49,30 @@ namespace UrlShortener.Service
             }
 
             return true;
+        }
+        public async Task<UserData> GetUserByToken(string token)
+        {
+            var loggedUser = await _context.Sessions.SingleOrDefaultAsync(r => r.SessionKey == Guid.Parse(token));
+
+            if (loggedUser is null)
+            {
+                return null;
+            }
+
+            var user = await _context.Users.SingleOrDefaultAsync(r => r.Email == loggedUser.Email);
+
+            if (user is null)
+            {
+                return null;
+            }
+
+            var userData = new UserData()
+            {
+                Name = user.Name,
+                Email = user.Email
+            };
+
+            return userData;
         }
     }
 }
