@@ -7,7 +7,7 @@
 </template>
 
 <script>
-    import { API_URL } from '../config/consts';
+    import { API_USER_ACCOUNT } from '../config/consts';
     import { ref, onMounted } from 'vue';
     import { useRouter } from 'vue-router';
 
@@ -21,7 +21,7 @@
 
             const fetchUserData = async () => {
                 try {
-                    const response = await fetch(`${API_URL}/user`, {
+                    const response = await fetch(API_USER_ACCOUNT, {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('authToken')}`

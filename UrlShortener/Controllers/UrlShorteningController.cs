@@ -9,6 +9,8 @@ using UrlShortener.Service;
 
 namespace UrlShortener.Controllers
 {
+    [ApiController]
+    [Route("app")]
     public class UrlShorteningController : Controller
     {
         private readonly DbStorageContext _context;
@@ -21,7 +23,7 @@ namespace UrlShortener.Controllers
         }
 
         [HttpPost]
-        [Route("/add")]
+        [Route("shorten")]
         public async Task<IActionResult> Add([FromBody] UrlShorteningRequest request)
         {
             if (string.IsNullOrEmpty(request.Url))
@@ -39,7 +41,7 @@ namespace UrlShortener.Controllers
         }
 
         [HttpGet]
-        [Route("/{code}")]
+        [Route("{code}")]
         public async Task<IResult> RedirectRequest(string code)
         {
             var url = await _urlShorteningService.FindUrlByCode(code);

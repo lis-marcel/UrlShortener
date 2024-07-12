@@ -7,6 +7,8 @@ using LoginRequest = UrlShortener.Models.LoginRequest;
 
 namespace UrlShortener.Controllers
 {
+    [ApiController]
+    [Route("user")]
     public class UserController : Controller
     {
         private readonly DbStorageContext _context;
@@ -21,7 +23,7 @@ namespace UrlShortener.Controllers
         }
 
         [HttpPost]
-        [Route("/register")]
+        [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
         {
             if (string.IsNullOrEmpty(registerRequest.Name) || string.IsNullOrEmpty(registerRequest.Email) || string.IsNullOrEmpty(registerRequest.Password))
@@ -54,7 +56,7 @@ namespace UrlShortener.Controllers
         }
 
         [HttpPost]
-        [Route("/user")]
+        [Route("account")]
         public async Task<IActionResult> GetUser()
         {
             var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();

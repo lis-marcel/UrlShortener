@@ -5,6 +5,8 @@ using UrlShortener.Service.DTO;
 using LoginRequest = UrlShortener.Models.LoginRequest;
 namespace UrlShortener.Controllers
 {
+    [ApiController]
+    [Route("session")]
     public class SessionController : Controller
     {
         private readonly DbStorageContext _context;
@@ -19,7 +21,7 @@ namespace UrlShortener.Controllers
         }
 
         [HttpPost]
-        [Route("/login")]
+        [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
             if (string.IsNullOrEmpty(loginRequest.Email) || string.IsNullOrEmpty(loginRequest.Password))
@@ -51,7 +53,7 @@ namespace UrlShortener.Controllers
         }
 
         [HttpPost]
-        [Route("/logout")]
+        [Route("logout")]
         public async Task<IActionResult> Logout()
         {
             var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();

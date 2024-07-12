@@ -20,7 +20,7 @@
     import { ref } from 'vue';
     import axios from 'axios';
     import { useRouter } from 'vue-router';
-    import { API_URL } from '../config/consts';
+    import { API_SESSION_LOGIN } from '../config/consts';
 
     export default {
         setup() {
@@ -32,10 +32,10 @@
 
             const loginUser = async () => {
                 try {
-                    const response = await axios.post(`${ API_URL }/login`, loginRequest.value);
+                    const response = await axios.post(API_SESSION_LOGIN, loginRequest.value);
                     if (response.status >= 200 && response.status < 300) {
                         localStorage.setItem('authToken', response.data);
-
+                        window.dispatchEvent(new CustomEvent('auth-change'));
                         router.push('/');
                     } else {
                         console.error('Login failed:', response.data.message);

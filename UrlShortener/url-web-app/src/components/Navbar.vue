@@ -16,8 +16,8 @@
                 </ul>
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <router-link v-if="!tokenExists" to="/login"><a class="nav-link">Login</a></router-link>
-                        <a v-else class="nav-link" @click="logout">Logout</a>
+                        <router-link v-if="!tokenExists" to="/login"><a class="nav-link">Log in</a></router-link>
+                        <a v-else class="nav-link" @click="logout">Log out</a>
                     </li>
                 </ul>
             </div>
@@ -63,14 +63,19 @@ export default {
 </script>
 
 <style scoped>
-.navbar-nav.ml-auto {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
+    .navbar-nav.ml-auto {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
 
-.navbar-nav a {
-    text-decoration: none;
-}
+    .navbar-nav a {
+        text-decoration: none;
+    }
+
+    .navbar-nav li.nav-item:hover a {
+        background-color: #5e5e5e; /* Dark grey background */
+        color: white; /* Change text color */
+    }
 </style>

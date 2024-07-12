@@ -23,6 +23,7 @@
 <script>
     import { ref } from 'vue';
     import axios from 'axios';
+    import { API_APP_SHORTEN } from '../config/consts';
 
     export default {
         setup() {
@@ -31,7 +32,7 @@
 
             const submitLink = async () => {
                 try {
-                    const response = await axios.post('https://localhost:7271/add', {
+                    const response = await axios.post(API_APP_SHORTEN, {
                         Url: Url.value,
                     }, {
                         headers: {
@@ -59,41 +60,41 @@
 </script>
 
 <style scoped>
-  .container {
-    margin: 5vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    height: 35vh;
-    width: 50%;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
+    .container {
+        margin: 5vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 35vh;
+        width: 50%;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
 
-  .form-group {
-    display: flex;
-    align-items: center;
-  }
+    .form-group {
+        display: flex;
+        align-items: center;
+    }
 
-  .form-control {
-    margin-right: 10px;
-  }
+    .form-control {
+        margin-right: 10px;
+    }
 
-  .btn-primary {
-    margin-left: 10px;
-  }
+    .btn-primary {
+        margin-left: 10px;
+    }
 
-  .output {
-    text-align: center;
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+    .output {
+        text-align: center;
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-  .output-content {
-    margin-bottom: 10px;
-  }
+    .output-content {
+        margin-bottom: 10px;
+    }
 </style>
