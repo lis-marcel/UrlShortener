@@ -1,58 +1,61 @@
 <template>
-  <div class="container">
-    <div class="input">
-      <form @submit.prevent="submitLink">
-        <h2>Paste the URL to be shortened</h2>
-        <div class="form-group mx-sm-3 mb-2">
-          <input v-model="Url" type="text" class="form-control" placeholder="Enter link here">
-          <button type="submit" class="btn btn-primary mb-2">Shorten URL</button>
+    <div class="container">
+        <div class="input">
+            <form @submit.prevent="submitLink">
+                <h2>Paste the URL to be shortened</h2>
+                <div class="form-group mx-sm-3 mb-2">
+                    <input v-model="Url" type="text" class="form-control" placeholder="Enter link here">
+                    <button type="submit" class="btn btn-primary mb-2">Shorten URL</button>
+                </div>
+            </form>
         </div>
-      </form>
+        <br>
+        <div v-if="shortLink" class="output">
+            <div class="output-content">
+                <h2>Your shortened link is:</h2>
+                <p>{{ shortLink }}</p>
+            </div>
+            <button @click="copyToClipboard" class="btn btn-primary">Copy to clipboard</button>
+        </div>
     </div>
-    <br>
-    <div v-if="shortLink" class="output">
-      <div class="output-content">
-        <h2>Your shortened link is:</h2>
-        <p>{{ shortLink }}</p>
-      </div>
-      <button @click="copyToClipboard" class="btn btn-primary">Copy to clipboard</button>
-    </div>
-  </div>
 </template>
 
 <script>
-import axios from 'axios';
+    import { ref } from 'vue';
+    import axios from 'axios';
 
-export default {
-  data() {
-    return {
-      Url: '',
-      shortLink: ''
+    export default {
+        setup() {
+            const Url = ref('');
+            const shortLink = ref('');
+
+            const submitLink = async () => {
+                try {
+                    const response = await axios.post('https://localhost:7271/add', {
+                        Url: Url.value,
+                    }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    shortLink.value = response.data;
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+
+            const copyToClipboard = () => {
+                navigator.clipboard.writeText(shortLink.value);
+            };
+
+            return {
+                Url,
+                shortLink,
+                submitLink,
+                copyToClipboard,
+            };
+        },
     };
-  },
-  methods: {
-    async submitLink() {
-      try {
-        await axios.post('https://localhost:7271/add', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          Url: this.Url,
-        })
-        .then(response => {
-          this.shortLink = response.data;
-        })
-      } 
-      catch (error) {
-        console.error(error);
-      }
-    },
-    copyToClipboard() {
-      navigator.clipboard.writeText(this.shortLink);
-    }
-  }
-};
 </script>
 
 <style scoped>

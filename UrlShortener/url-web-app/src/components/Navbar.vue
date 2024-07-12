@@ -26,24 +26,51 @@
 </template>
 
 <script>
+import { ref, onBeforeUnmount } from 'vue';
+import { useRouter } from 'vue-router';
+
 export default {
-    data() {
+    setup() {
+        const tokenExists = ref(localStorage.getItem('authToken') !== null);
+        const router = useRouter();
+
+        const updateTokenStatus = () => {
+            tokenExists.value = localStorage.getItem('authToken') !== null;
+        };
+
+        const logout = () => {
+            localStorage.removeItem('authToken');
+            updateTokenStatus();
+            router.push('/');
+        };
+
+        const onAuthChange = () => {
+            updateTokenStatus();
+        };
+
+        window.addEventListener('auth-change', onAuthChange);
+
+        onBeforeUnmount(() => {
+            window.removeEventListener('auth-change', onAuthChange);
+        });
+
         return {
-            tokenExists: localStorage.getItem('authToken') !== null
-        }
+            tokenExists,
+            logout,
+        };
     },
 }
 </script>
 
 <style scoped>
-    .navbar-nav.ml-auto {
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-    }
+.navbar-nav.ml-auto {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
 
-    .navbar-nav a {
-        text-decoration: none;
-    }
-    </style>
+.navbar-nav a {
+    text-decoration: none;
+}
+</style>

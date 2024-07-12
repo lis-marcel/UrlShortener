@@ -7,38 +7,47 @@
 </template>
 
 <script>
-import { API_URL } from '../config/consts';
+    import { API_URL } from '../config/consts';
+    import { ref, onMounted } from 'vue';
+    import { useRouter } from 'vue-router';
 
-export default {
-    data() {
-        return {
-            user: {
+    export default {
+        setup() {
+            const user = ref({
                 email: '',
                 name: '',
-            }
-        };
-    },
-    async mounted() {
-        try {
-            const response = await fetch(`${API_URL}/user`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            });
+            const router = useRouter();
+
+            const fetchUserData = async () => {
+                try {
+                    const response = await fetch(`${API_URL}/user`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        user.value = await response.json();
+                        console.log(user.value);
+                    } else {
+                        router.push('/login');
+                    }
+                } catch (error) {
+                    console.error(error);
                 }
+            };
+
+            onMounted(() => {
+                fetchUserData();
             });
 
-            if (response.ok) {
-                this.user = await response.json();
-
-                console.log(this.user);
-            } else {
-                this.$router.push('/login');
-            }
-        } catch (error) {
-            console.error(error);
+            return {
+                user
+            };
         }
     }
-}
 </script>
 
 <style scoped>
