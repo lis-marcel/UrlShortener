@@ -15,6 +15,7 @@ namespace UrlShortener.Service
         {
             _context = context;
         }
+
         public async Task<bool> RegisterUser(RegisterRequestData registerRequestData)
         {
             if (await UserExists(registerRequestData.Email))
@@ -35,10 +36,12 @@ namespace UrlShortener.Service
 
             return true;
         }
+
         public async Task<bool> UserExists(string email)
         {
             return await _context.Users.AnyAsync(r => r.Email == email);
         }
+
         public async Task<bool> ValidateUser(LoginRequestData loginRequestData)
         {
             var user = await _context.Users.SingleOrDefaultAsync(r => r.Email == loginRequestData.Email);
@@ -50,6 +53,7 @@ namespace UrlShortener.Service
 
             return true;
         }
+
         public async Task<UserData> GetUserByToken(string token)
         {
             var loggedUser = await _context.Sessions.SingleOrDefaultAsync(r => r.SessionKey == Guid.Parse(token));
@@ -59,7 +63,7 @@ namespace UrlShortener.Service
                 return null;
             }
 
-            var user = await _context.Users.SingleOrDefaultAsync(r => r.Email == loggedUser.Email);
+            var user = await _context.Users.SingleOrDefaultAsync(r => r.Id == loggedUser.UserId);
 
             if (user is null)
             {

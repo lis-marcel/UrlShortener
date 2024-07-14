@@ -3,14 +3,14 @@
     public class Session
     {
         public Guid Id { get; set; }
-        public string Email { get; set; }
+        public Guid UserId { get; set; }
         public Guid SessionKey { get; set; }
         public DateTime CreationTime { get; set; }
         public DateTime ExpirationTime { get; set; }
 
-        public Session(string email)
+        public Session(Guid id)
         {
-            Email = email;
+            UserId = id;
             SessionKey = Guid.NewGuid();
             CreationTime = DateTime.Now;
             ExpirationTime = DateTime.Now.AddMinutes(20);

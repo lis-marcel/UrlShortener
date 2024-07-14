@@ -26,7 +26,7 @@ namespace UrlShortener.Controllers
         {
             if (string.IsNullOrEmpty(loginRequest.Email) || string.IsNullOrEmpty(loginRequest.Password))
             {
-                return BadRequest("Email and password cannot be null or empty.");
+                return BadRequest("UserId and password cannot be null or empty.");
             }
 
             if (!await _userService.UserExists(loginRequest.Email))

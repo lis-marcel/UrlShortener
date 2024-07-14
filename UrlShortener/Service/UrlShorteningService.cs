@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using UrlShortener.Database;
 using UrlShortener.Entities;
 using UrlShortener.Service.DTOconverters;
@@ -14,9 +15,20 @@ namespace UrlShortener.Service
             _context = context;
         }
 
-        public async Task<Guid> Add(string domain, string url)
+        public async Task<Guid> Add(string domain, string url, string? sessionKey = null)
         {
             var code = await GenerateUniqueCode();
+            Guid? ownerId = null;
+
+            if (!string.IsNullOrEmpty(sessionKey))
+            {
+                var sessionData = await _context.Sessions.FirstOrDefaultAsync(r => r.SessionKey == Guid.Parse(sessionKey));
+
+                if (sessionData is not null)
+                {
+                    ownerId = sessionData.UserId;
+                }
+            }
 
             ShortenedUrl shortenedUrls = new()
             {
@@ -24,6 +36,7 @@ namespace UrlShortener.Service
                 Url = url,
                 Code = code,
                 ShortUrl = $"{domain}/{code}",
+                OwnerId = ownerId,
                 CreationTime = DateTime.Now,
             };
 
@@ -40,6 +53,7 @@ namespace UrlShortener.Service
 
             return shortenedUrl?.Url;
         }
+
         public async Task<ShortenedUrlData> GetUrlById(Guid guid)
         {
             var url = await _context.ShortenedUrls.SingleAsync(r => r.Id == guid);
@@ -55,12 +69,14 @@ namespace UrlShortener.Service
 
             return urlData;
         }
+
         public async Task<IEnumerable<ShortenedUrlData>> GetAllUrls()
         {
             return await _context.ShortenedUrls.Select
                 (r => ConvertShortenedUrl.ShortendedUrlToShortendedUrlData(r))
                 .ToListAsync();
         }
+
         public async Task<bool> Delete(Guid guid)
         {
             var shortenedUrl = _context.ShortenedUrls.Single(r => r.Id == guid);
@@ -70,6 +86,7 @@ namespace UrlShortener.Service
 
             return result > 0;
         }
+
         public async Task<string> GenerateUniqueCode()
         {
             var codeGenerator = new CodeGeneratorService(_context);

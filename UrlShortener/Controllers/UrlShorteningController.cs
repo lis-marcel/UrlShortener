@@ -26,13 +26,15 @@ namespace UrlShortener.Controllers
         [Route("shorten")]
         public async Task<IActionResult> Add([FromBody] UrlShorteningRequest request)
         {
+            var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
             if (string.IsNullOrEmpty(request.Url))
             {
                 return BadRequest("URL cannot be null or empty.");
             }
 
             var serviceDomain = $"{Request.Scheme}://{Request.Host}";
-            var addedGuid = await _urlShorteningService.Add(serviceDomain, request.Url);
+            var addedGuid = await _urlShorteningService.Add(serviceDomain, request.Url, token);
 
             var dbRecord = await _urlShorteningService.GetUrlById(addedGuid);
             var shortenedLink = dbRecord.ShortUrl;

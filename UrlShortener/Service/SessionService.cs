@@ -21,7 +21,7 @@ namespace UrlShortener.Service
 
             if (user is not null && PasswordHashing.VerifyPassword(user.Password, loginRequestData.Password))
             {
-                var sessionKey = await CreateSession(user.Email);
+                var sessionKey = await CreateSession(user.Id);
 
                 return sessionKey;
             }
@@ -53,13 +53,13 @@ namespace UrlShortener.Service
             return false;
         }
 
-        private async Task<Guid> CreateSession(string email)
+        private async Task<Guid> CreateSession(Guid userId)
         {
-            var session = await _context.Sessions.SingleOrDefaultAsync(r => r.Email == email);
+            var session = await _context.Sessions.SingleOrDefaultAsync(r => r.UserId == userId);
 
             if (session is null)
             {
-                session = new Session(email);
+                session = new Session(userId);
                 _context.Sessions.Add(session);
             }
             else
