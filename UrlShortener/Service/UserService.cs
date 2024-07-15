@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using UrlShortener.Database;
 using UrlShortener.Entities;
 using UrlShortener.Service.DTO;
+using UrlShortener.Service.DTOconverters;
 
 namespace UrlShortener.Service
 {
@@ -54,6 +55,14 @@ namespace UrlShortener.Service
             return true;
         }
 
+        public async Task<IEnumerable<ShortenedUrlData>> GetAllUserUrls(Guid userId)
+        {
+            return await _context.ShortenedUrls
+                .Where(r => r.OwnerId == userId)
+                .Select(r => ConvertShortenedUrl.ShortendedUrlToShortendedUrlData(r))
+                .ToListAsync();
+        }
+
         public async Task<UserData> GetUserByToken(string token)
         {
             var loggedUser = await _context.Sessions.SingleOrDefaultAsync(r => r.SessionKey == Guid.Parse(token));
@@ -72,6 +81,7 @@ namespace UrlShortener.Service
 
             var userData = new UserData()
             {
+                Id = user.Id,
                 Name = user.Name,
                 Email = user.Email
             };

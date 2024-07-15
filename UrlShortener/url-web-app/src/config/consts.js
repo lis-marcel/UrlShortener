@@ -7,6 +7,7 @@ export const API_URL = 'https://localhost:7271';
 export const API_USER = 'https://localhost:7271/user';
 export const API_USER_REGISTER = 'https://localhost:7271/user/register';
 export const API_USER_ACCOUNT = 'https://localhost:7271/user/account';
+export const API_USER_LINKS = `${API_USER}/links`;
 
 // Session API URLs
 export const API_SESSION = 'https://localhost:7271/session';

@@ -77,5 +77,30 @@ namespace UrlShortener.Controllers
                 return BadRequest("User not found.");
             }
         }
+
+        [HttpGet]
+        [Route("links")]
+        public async Task<IActionResult> GetUserLinks()
+        {
+            var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return BadRequest("Can not identify user");
+            }
+
+            var user = await _userService.GetUserByToken(token);
+
+            if (user is not null)
+            {
+                var shortenedUrls = await _userService.GetAllUserUrls(user.Id);
+
+                return Ok(shortenedUrls);
+            }
+            else
+            {
+                return BadRequest("User not found.");
+            }
+        }
     }
 }
