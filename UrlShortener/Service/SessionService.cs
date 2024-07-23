@@ -38,7 +38,7 @@ namespace UrlShortener.Service
         {
             if (Guid.TryParse(token, out Guid sessionKey))
             {
-                var session = await _context.Sessions.FindAsync(sessionKey);
+                var session = await _context.Sessions.SingleOrDefaultAsync(r => r.SessionKey == sessionKey);
 
                 if (session is not null)
                 {
@@ -53,24 +53,22 @@ namespace UrlShortener.Service
             return false;
         }
 
+
         private async Task<Guid> CreateSession(Guid userId)
         {
             var session = await _context.Sessions.SingleOrDefaultAsync(r => r.UserId == userId);
 
-            if (session is null)
+            if (session is not null)
+            {
+                await RefreshSessionExpiration(session.SessionKey.ToString());
+            }
+            else
             {
                 session = new Session(userId);
                 _context.Sessions.Add(session);
             }
-            else
-            {
-                session.SessionKey = Guid.NewGuid();
-                session.CreationTime = DateTime.Now;
-                _context.Sessions.Update(session);
-            }
 
             await _context.SaveChangesAsync();
-
             return session.SessionKey;
         }
 
