@@ -7,6 +7,8 @@
                     <input v-model="Url" type="text" class="form-control" placeholder="Enter link here">
                     <button type="submit" class="btn btn-primary mb-2">Shorten URL</button>
                 </div>
+                <!-- Error message display -->
+                <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
             </form>
         </div>
         <br>
@@ -32,20 +34,48 @@
             const Url = ref('');
             const shortLink = ref('');
             const isCopied = ref(false);
+            const errorMessage = ref(''); // Define a ref for storing the error message
 
             const submitLink = async () => {
+                if (!isValidUrl(Url.value)) {
+                    errorMessage.value = 'Please enter a valid URL.';
+                    return;
+                }
+
                 try {
                     const response = await axios.post(API_APP_SHORTEN, {
                         Url: Url.value,
                     }, {
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                         },
                     });
                     shortLink.value = response.data;
+                    errorMessage.value = ''; // Clear error message on successful request
                 } catch (error) {
                     console.error(error);
+                    if (error.response && error.response.status === 400) {
+                        // Assuming the server sends back a plain text message
+                        errorMessage.value = error.response.data || 'An error occurred';
+                    } else {
+                        // Handle other types of errors (e.g., network error, server error)
+                        errorMessage.value = 'An unexpected error occurred';
+                    }
+                }
+            };
+
+            // URL validation function
+            const isValidUrl = (url) => {
+                const urlPattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+                    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+                    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+                    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+                try {
+                    return !!new URL(url) && urlPattern.test(url);
+                } catch (_) {
+                    return false;
                 }
             };
 
@@ -65,6 +95,7 @@
                 submitLink,
                 copyToClipboard,
                 isCopied,
+                errorMessage, // Make errorMessage available to the template
             };
         },
     };
@@ -114,6 +145,15 @@
 
     .output-content {
         margin-bottom: 10px;
+    }
+
+    .error-message {
+        background-color: #f8d7da; /* Light red background */
+        color: #721c24; /* Dark red text color for contrast */
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 5px;
+        border: 1px solid #f5c6cb;
     }
 
     @media (max-width: 768px) {

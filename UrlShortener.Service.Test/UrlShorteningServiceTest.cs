@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 using UrlShortener.Database;
 using UrlShortener.Entities;
 using Xunit;
@@ -9,124 +11,122 @@ namespace UrlShortener.Service.Test
     [TestClass]
     public class UrlShorteningServiceTest
     {
-        [TestMethod]
-        public void AddTest()
+        private DbContextOptions<DbStorageContext> GetInMemoryOptions()
         {
-            var options = new DbContextOptionsBuilder<DbStorageContext>()
-                .UseInMemoryDatabase(databaseName: "AppTestDb.db")
+            return new DbContextOptionsBuilder<DbStorageContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
+        }
+
+        [TestMethod]
+        public async Task Add_ValidUrl_ShouldAddUrl()
+        {
+            var options = GetInMemoryOptions();
             using var context = new DbStorageContext(options);
             var service = new UrlShorteningService(context);
 
-            service.Add("https://foxnet.com", "yt.com/1234");
+            var result = await service.Add("https://foxnet.com", "https://example.com");
 
             Assert.AreEqual(1, context.ShortenedUrls.Count());
-
-            context.Database.EnsureDeleted();
+            Assert.IsNotNull(result);
         }
+
         [TestMethod]
-        public void AddReturnTypeTest()
+        public async Task Add_InvalidUrl_ShouldNotAddUrl()
         {
-            var options = new DbContextOptionsBuilder<DbStorageContext>()
-                .UseInMemoryDatabase(databaseName: "AppTestDb.db")
-                .Options;
+            var options = GetInMemoryOptions();
             using var context = new DbStorageContext(options);
             var service = new UrlShorteningService(context);
 
-            var addResultGuid = service.Add("https://foxnet.com", "yt.com/1234").Result;
-
-            Assert.AreEqual(typeof(Guid), addResultGuid.GetType());
-
-            context.Database.EnsureDeleted();
-        }
-        [TestMethod]
-        public void DeleteTest()
-        {
-            var options = new DbContextOptionsBuilder<DbStorageContext>()
-                .UseInMemoryDatabase(databaseName: "AppTestDb.db")
-                .Options;
-            using var context = new DbStorageContext(options);
-            var service = new UrlShorteningService(context);
-
-            var guid = service.Add("https://foxnet.com", "yt.com/1234").Result;
-
-            var deleteResult = service.Delete(guid);
+            var result = await service.Add("https://foxnet.com", "invalid-url");
 
             Assert.AreEqual(0, context.ShortenedUrls.Count());
-
-            context.Database.EnsureDeleted();
+            Assert.AreEqual("The URL is not valid or unreachable.", result);
         }
+
         [TestMethod]
-        public void DeleteReturnTypeTest()
+        public async Task GetUrlByCode_ValidCode_ShouldReturnUrl()
         {
-            var options = new DbContextOptionsBuilder<DbStorageContext>()
-                .UseInMemoryDatabase(databaseName: "AppTestDb.db")
-                .Options;
+            var options = GetInMemoryOptions();
             using var context = new DbStorageContext(options);
             var service = new UrlShorteningService(context);
 
-            var addResultGuid = service.Add("https://foxnet.com", "yt.com/1234").Result;
+            var addResult = await service.Add("https://foxnet.com", "https://example.com");
+            var shortenedUrl = context.ShortenedUrls.First();
 
-            var deleteResult = service.Delete(addResultGuid).Result;
+            var result = await service.GetUrlByCode(shortenedUrl.Code);
 
-            Assert.AreEqual(typeof(bool), deleteResult.GetType());
-
-            context.Database.EnsureDeleted();
+            Assert.AreEqual("https://example.com", result);
         }
+
         [TestMethod]
-        public void GetUrlByIdTest()
+        public async Task GetUrlByCode_InvalidCode_ShouldReturnNull()
         {
-            var options = new DbContextOptionsBuilder<DbStorageContext>()
-                .UseInMemoryDatabase(databaseName: "AppTestDb.db")
-                .Options;
+            var options = GetInMemoryOptions();
             using var context = new DbStorageContext(options);
             var service = new UrlShorteningService(context);
 
-            var expectedUrl = "yt.com/10";
-            var expectedDomain = "https://foxnet.com";
-            var addResultGuid = service.Add(expectedDomain, expectedUrl).Result;
+            var result = await service.GetUrlByCode("invalid-code");
 
-            var res = service.GetUrlById(addResultGuid).Result;
-
-            Assert.AreEqual(expectedUrl, res.Url);
-
-            context.Database.EnsureDeleted();
+            Assert.IsNull(result);
         }
+
         [TestMethod]
-        public void GetAllUrlsTest()
+        public async Task Delete_ValidId_ShouldDeleteUrl()
         {
-            var options = new DbContextOptionsBuilder<DbStorageContext>()
-                .UseInMemoryDatabase(databaseName: "AppTestDb.db")
-                .Options;
+            var options = GetInMemoryOptions();
             using var context = new DbStorageContext(options);
             var service = new UrlShorteningService(context);
 
-            service.Add("yt.com", "yt.com/10");
-            service.Add("yt.com", "yt.com/200");
-            service.Add("yt.com", "yt.com/3000");
+            var addResult = await service.Add("https://foxnet.com", "https://example.com");
+            var shortenedUrl = context.ShortenedUrls.First();
 
-            var res = service.GetAllUrls().Result;
+            var deleteResult = await service.Delete(shortenedUrl.Id);
 
-            Assert.AreEqual(3, res.Count());
-
-            context.Database.EnsureDeleted();
+            Assert.IsTrue(deleteResult);
+            Assert.AreEqual(0, context.ShortenedUrls.Count());
         }
+
         [TestMethod]
-        public void FindUrlByCodeTest()
+        public async Task Delete_InvalidId_ShouldReturnFalse()
         {
-            var options = new DbContextOptionsBuilder<DbStorageContext>()
-                .UseInMemoryDatabase(databaseName: "AppTestDb.db")
-                .Options;
+            var options = GetInMemoryOptions();
             using var context = new DbStorageContext(options);
             var service = new UrlShorteningService(context);
 
-            var addResGuid =  service.Add("yt.com/10", "https://foxnet.com").Result;
-            var foundObjectByGuid = service.GetUrlById(addResGuid).Result;
-            var foundObjectByCode = service.FindUrlByCode(foundObjectByGuid.Code).Result;
+            var deleteResult = await service.Delete(Guid.NewGuid());
 
-            Assert.AreEqual(foundObjectByGuid.Url, foundObjectByCode);           
+            Assert.IsFalse(deleteResult);
+        }
 
-            context.Database.EnsureDeleted();
+        [TestMethod]
+        public async Task GetAllUrls_ShouldReturnAllUrls()
+        {
+            var options = GetInMemoryOptions();
+            using var context = new DbStorageContext(options);
+            var service = new UrlShorteningService(context);
+
+            var res1 = await service.Add("https://foxnet.com", "https://guthib.com/");
+            var res2 = await service.Add("https://foxnet.com", "https://github.com/");
+
+            var result = await service.GetAllUrls();
+
+            Assert.AreEqual(2, result.Count());
+        }
+
+        [TestMethod]
+        public async Task GetUrlById_ValidId_ShouldReturnUrlData()
+        {
+            var options = GetInMemoryOptions();
+            using var context = new DbStorageContext(options);
+            var service = new UrlShorteningService(context);
+
+            var addResult = await service.Add("https://foxnet.com", "https://example.com");
+            var shortenedUrl = context.ShortenedUrls.First();
+
+            var result = await service.GetUrlById(shortenedUrl.Id);
+
+            Assert.AreEqual(shortenedUrl.Url, result.Url);
         }
     }
 }

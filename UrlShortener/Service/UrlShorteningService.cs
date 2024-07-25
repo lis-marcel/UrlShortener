@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using UrlShortener.Database;
 using UrlShortener.Entities;
 using UrlShortener.Service.DTOconverters;
@@ -9,44 +11,38 @@ namespace UrlShortener.Service
     public class UrlShorteningService
     {
         private readonly DbStorageContext _context;
+        private static readonly HttpClient httpClient = new() { Timeout = TimeSpan.FromSeconds(5) };
 
         public UrlShorteningService(DbStorageContext context)
         {
             _context = context;
         }
 
-        public async Task<Guid> Add(string domain, string url, string? sessionKey = null)
+        public async Task<string> Add(string domain, string url)
         {
-            var code = await GenerateUniqueCode();
-            Guid? ownerId = null;
-
-            if (!string.IsNullOrEmpty(sessionKey))
+            if (!await IsValidUrl(url))
             {
-                var sessionData = await _context.Sessions.FirstOrDefaultAsync(r => r.SessionKey == Guid.Parse(sessionKey));
-
-                if (sessionData is not null)
-                {
-                    ownerId = sessionData.UserId;
-                }
+                return "The URL is not valid or unreachable.";
             }
+
+            var code = await GenerateUniqueCode();
 
             ShortenedUrl shortenedUrls = new()
             {
                 Id = Guid.NewGuid(),
                 Url = url,
                 Code = code,
-                ShortUrl = $"{domain}/{code}",
-                OwnerId = ownerId,
+                ShortUrl = $"{domain}/FoxNet/shortener/{code}",
                 CreationTime = DateTime.Now,
             };
 
             _context.ShortenedUrls.Add(shortenedUrls);
             await _context.SaveChangesAsync();
 
-            return shortenedUrls.Id;
+            return shortenedUrls.Id.ToString();
         }
 
-        public async Task<string?> FindUrlByCode(string code)
+        public async Task<string?> GetUrlByCode(string code)
         {
             var shortenedUrl = await _context
                 .ShortenedUrls
@@ -80,20 +76,43 @@ namespace UrlShortener.Service
 
         public async Task<bool> Delete(Guid guid)
         {
-            var shortenedUrl = _context.ShortenedUrls.Single(r => r.Id == guid);
+            var shortenedUrl = _context.ShortenedUrls.SingleOrDefault(r => r.Id == guid);
+            if (shortenedUrl == null)
+            {
+                return false;
+            }
 
             _context.ShortenedUrls.Remove(shortenedUrl);
-            var result = await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            return result > 0;
+            return true;
         }
 
-        public async Task<string> GenerateUniqueCode()
+        private async Task<string> GenerateUniqueCode()
         {
             var codeGenerator = new CodeGeneratorService(_context);
             var uniqueCode = await codeGenerator.GenerateUniqueCode();
 
             return uniqueCode.ToString();
+        }
+
+        private static async Task<bool> IsValidUrl(string url)
+        {
+            if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
+            {
+                return false;
+            }
+
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Head, url);
+                var response = await httpClient.SendAsync(request);
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

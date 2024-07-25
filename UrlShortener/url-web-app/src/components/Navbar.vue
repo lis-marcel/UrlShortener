@@ -1,5 +1,5 @@
 <template>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg" :class="isDarkMode ? 'navbar-dark bg-dark' : 'navbar-light bg-light'">
         <div class="container-fluid">
             <a class="navbar-brand">FoxNet</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -16,8 +16,9 @@
                 </ul>
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <router-link v-if="!tokenExists" to="/login"><a class="nav-link">Log in</a></router-link>
-                        <a v-else class="nav-link" @click="logout">Log out</a>
+                        <button @click="toggleDarkMode" class="btn btn-outline-secondary">
+                            {{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}
+                        </button>
                     </li>
                 </ul>
             </div>
@@ -26,12 +27,13 @@
 </template>
 
 <script>
-import { ref, onBeforeUnmount } from 'vue';
+import { ref, onBeforeUnmount, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default {
     setup() {
         const tokenExists = ref(localStorage.getItem('authToken') !== null);
+        const isDarkMode = ref(localStorage.getItem('theme') === 'dark');
         const router = useRouter();
 
         const updateTokenStatus = () => {
@@ -48,34 +50,51 @@ export default {
             updateTokenStatus();
         };
 
+        const toggleDarkMode = () => {
+            isDarkMode.value = !isDarkMode.value;
+            document.body.classList.toggle('dark-mode', isDarkMode.value);
+            localStorage.setItem('theme', isDarkMode.value ? 'dark' : 'light');
+        };
+
         window.addEventListener('auth-change', onAuthChange);
 
         onBeforeUnmount(() => {
             window.removeEventListener('auth-change', onAuthChange);
         });
 
+        onMounted(() => {
+            // Initialize the theme based on the stored preference
+            if (isDarkMode.value) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        });
+
         return {
             tokenExists,
             logout,
+            isDarkMode,
+            toggleDarkMode,
         };
     },
 }
 </script>
 
 <style scoped>
-    .navbar-nav.ml-auto {
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-    }
+.navbar-nav.ml-auto {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
 
-    .navbar-nav a {
-        text-decoration: none;
-    }
+.navbar-nav a {
+    text-decoration: none;
+}
 
-    .navbar-nav li.nav-item:hover a {
-        background-color: #5e5e5e; /* Dark grey background */
-        color: white; /* Change text color */
-    }
+.navbar-nav li.nav-item:hover a {
+    background-color: #5e5e5e; /* Dark grey background */
+    color: white; /* Change text color */
+}
 </style>

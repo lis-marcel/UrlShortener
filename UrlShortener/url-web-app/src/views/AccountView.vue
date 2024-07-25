@@ -1,9 +1,7 @@
 <script setup>
-    import UserData from '../components/UserData.vue';
-    import UserLinks from '../components/UserLinks.vue';
+    import UserAccount from '../components/UserAccount.vue';
 </script>
 
 <template>
-    <UserData />
-    <UserLinks />
+    <UserAccount />
 </template>
