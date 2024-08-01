@@ -1,13 +1,13 @@
 version: '3.8'
 
 services:
-  # vue-app:
-  #   build:
-  #     context: ./url-web-app/
-  #   ports:
-  #     - "8080:80"  # Expose Vue app on port 8080
-  #   depends_on:
-  #     - asp-api
+  vue-app:
+    build:
+      context: ./url-web-app/
+    ports:
+      - "8080:80"  # Expose Vue app on port 8080
+    depends_on:
+      - asp-api
 
   asp-api:
     build:

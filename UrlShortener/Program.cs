@@ -31,6 +31,8 @@ namespace UrlShortener
 
             builder.Services.AddDistributedMemoryCache();
 
+            builder.Services.AddDataProtection();
+
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -44,8 +46,6 @@ namespace UrlShortener
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
-            app.UseSession();
 
             app.UseCors("AllowSpecificOrigin");
             app.MapGet("/", async () =>
