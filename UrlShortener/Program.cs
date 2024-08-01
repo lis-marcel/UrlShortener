@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Session;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Text;
 using UrlShortener.Database;
 using UrlShortener.Service;
@@ -22,22 +20,16 @@ namespace UrlShortener
 
             builder.Services.AddCors(options =>
             {
-                options.AddDefaultPolicy(
+                options.AddPolicy("AllowSpecificOrigin", // Allow specific origin
                 builder =>
                 {
-                    builder.WithOrigins("http://localhost:5173")
+                    builder.WithOrigins("http://localhost:8080")
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                 });
             });
 
             builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddSession(options =>
-            {
-                options.Cookie.Name = ".UrlShortener.Session";
-                options.IdleTimeout = TimeSpan.FromMinutes(20);
-                options.Cookie.IsEssential = true;
-            });
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -55,19 +47,13 @@ namespace UrlShortener
 
             app.UseSession();
 
-            app.UseCors(builder => builder
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
-
+            app.UseCors("AllowSpecificOrigin");
             app.MapGet("/", async () =>
             {
                 var filePath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "index.html");
                 var fileBytes = await File.ReadAllBytesAsync(filePath);
                 return Results.Content(Encoding.UTF8.GetString(fileBytes), "text/html");
             });
-
-            app.UseMiddleware<SessionMiddleware>();
 
             app.UseHttpsRedirection();
 
